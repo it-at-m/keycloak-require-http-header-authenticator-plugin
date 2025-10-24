@@ -1,54 +1,78 @@
-## Customize this file after creating the new REPO and remove this lines.
-What to adjust:  
-* Add the your project or repo name direct under the logo.
-* Add a short and long desciption.
-* Add links for your final repo to report a bug or request a feature.
-* Add list of used technologies.
-* If you have, add a roadmap or remove this section.
-* Fill up the section for set up and documentation.
- * Start in this file only with documentation and link to the docs folder.
-* Add more project shields. Use [shields.io](https://shields.io/) with style `for-the-badge`.
+[open-issues]: https://github.com/it-at-m/keycloak-require-http-header-authenticator-plugin/issues
+[new-issue]: https://github.com/it-at-m/keycloak-require-http-header-authenticator-plugin/issues/new/choose
+[license]: ./LICENSE
+[new-issue-shield]: https://img.shields.io/badge/new%20issue-blue?style=for-the-badge
+[made-with-love-shield]: https://img.shields.io/badge/made%20with%20%E2%9D%A4%20by-it%40M-yellow?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/it-at-m/refarch?style=for-the-badge
+[itm-opensource]: https://opensource.muenchen.de/
 
-## ------- end to remove -------
-<!-- add Project Logo, if existing -->
+# keycloak-require-http-header-authenticator-plugin
 
-# repo or project name
-
+[![New issue][new-issue-shield]][new-issue]
 [![Made with love by it@M][made-with-love-shield]][itm-opensource]
-<!-- feel free to add more shields, style 'for-the-badge' -> see https://shields.io/badges -->
+[![GitHub license][license-shield]][license]
 
-*Add a description from your project here.*
+Authenticator for evaluating an HTTP header and its value.
 
+## Built With
 
-### Built With
+- OpenJDK 21
+- Keycloak 26
 
-The documentation project is built with technologies we use in our projects:
+## Deploy
 
-* *write here the list of used technologies*
+Copy the file `require-http-header-authenticator-X.X.X.jar` from the `target` directory
+(which exists after the build process) into the KeyCloak directory `providers`.
+
+## Configure
+
+The following values are configurable:
+
+* Header Name: The name of the header to be checked
+* Header Value: The expected value of the header
+* NEGATE-LOGIC: Invert checking logic, i.e. error if the header contains the expected value
+
+## Test
+
+Can be locally tested like this:
+
+### Version 1 - Header set by proxy
+
+* Create new realm `muenchen.de`
+* Authentication
+    * Flow "Browser" --> Dropdown "Action" --> Duplicate --> Name "browser_with_header"
+    * Configure the flow like this: ![browser_with_header_flow](browser_with_header_flow.png)
+        * Subflow "external" --> execution "Require HTTP-Header" --> Settings
+            * Alias: external
+            * negate logic: Off
+            * HTTP Header Name: X-LHM-Origin
+            * HTTP Header Value: external
+        * Subflow "internal" --> execution "Require HTTP-Header" --> Settings
+            * Alias: internal
+            * * negate logic: On
+            * HTTP Header Name: X-LHM-Origin
+            * HTTP Header Value: external
+* Create user test with password test in same realm
+* Login to account in realm `muenchen.de`, should work with password only
+* Use a proxy to set the header X-LHM-Origin to `external` when calling Keycloak
+* Login again, now the 2FA (via OTP) is active and will request a second factor
+
+### Version 2 - Header set manually
+
+* Like above, but only one subflow like this: ![browser_with_header_flow_one_flow](browser_with_header_flow_one_flow.png)* Subflow "external" --> execution "Require HTTP-Header" --> Settings
+    * Alias: external
+    * negate logic: Off
+    * HTTP Header Name: X-LHM-Origin
+    * HTTP Header Value: external
+* With request tool like Bruno, send this request:
+  `https://localhost:8443/auth/realms/muenchen.de/protocol/openid-connect/auth?client_id=account-console&redirect_uri=https%3A%2F%2Flocalhost%3A8443%2Fauth%2Frealms%2Fmuenchen.de%2Faccount&response_type=code&code_challenge=WLs5-39Xt_FMLLZyHs18bzag6zInEDt2rQ3GJd0vgLk&code_challenge_method=S256`
+* Will return http-400 with error "Invalid username or password."
+* Make same request, but this time add a header with key `X-LHM-Origin` and value `external`
+* Will return http-200 with login page
 
 ## Roadmap
 
-*if you have a ROADMAP for your project add this here*
-
-
-See the [open issues](#) for a full list of proposed features (and known issues).
-
-
-## Set up
-*how can i start and fly this project*
-
-## Documentation
-*what insights do you have to tell*
-
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
-```
-
-use [diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams).
+See the [open issues][open-issues] for a full list of proposed features (and known issues).
 
 ## Contributing
 
@@ -64,18 +88,12 @@ Don't forget to give the project a star! Thanks again!
 5. Push to the Branch (`git push origin feature/AmazingFeature`)
 6. Open a Pull Request
 
-More about this in the [CODE_OF_CONDUCT](/CODE_OF_CONDUCT.md) file.
-
+More about this in the [CODE_OF_CONDUCT](./.github/CODE_OF_CONDUCT.md) file.
 
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) file for more information.
 
-
 ## Contact
 
-it@M - opensource@muenchen.de
-
-<!-- project shields / links -->
-[made-with-love-shield]: https://img.shields.io/badge/made%20with%20%E2%9D%A4%20by-it%40M-yellow?style=for-the-badge
-[itm-opensource]: https://opensource.muenchen.de/
+it@M - <opensource@muenchen.de>
