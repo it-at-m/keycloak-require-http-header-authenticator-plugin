@@ -52,7 +52,7 @@
         <keycloak.version>26.3.2</keycloak.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <scm.plugin.version>2.1.0</scm.plugin.version>
-        <jboss.logging.version>3.6.0.Final</jboss.logging.version>
+        <jboss.logging.version>3.6.1.Final</jboss.logging.version>
     </properties>
 
     <dependencies>
